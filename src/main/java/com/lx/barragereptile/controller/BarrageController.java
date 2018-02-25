@@ -25,10 +25,6 @@ public class BarrageController {
         return "index";
     }
 
-    @GetMapping("index1")
-    String index1() {
-        return "bootindex";
-    }
 
     /**
      * 创建任务
