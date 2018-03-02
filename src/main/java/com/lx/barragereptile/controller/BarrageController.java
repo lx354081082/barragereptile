@@ -49,6 +49,9 @@ public class BarrageController {
         return true;
     }
 
+    /**
+     * 创建任务
+     */
     @GetMapping("/douyu/{roomid}")
     @ResponseBody
     Object rid(@PathVariable("roomid") String roomid) {

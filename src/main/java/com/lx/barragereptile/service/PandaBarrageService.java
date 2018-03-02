@@ -2,6 +2,6 @@ package com.lx.barragereptile.service;
 
 import com.lx.barragereptile.pojo.PandaBarrage;
 
-public interface BarrageService {
+public interface PandaBarrageService {
     int save(PandaBarrage pandaBarrage);
 }

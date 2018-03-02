@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lx.barragereptile.pojo.PandaBarrage;
-import com.lx.barragereptile.service.BarrageService;
+import com.lx.barragereptile.service.PandaBarrageService;
 import com.lx.barragereptile.util.DateFormatUtils;
 import com.lx.barragereptile.util.Utils;
 import lombok.extern.log4j.Log4j;
@@ -29,7 +29,7 @@ import java.util.List;
 @Log4j
 public class PandaTvCrawl implements Runnable,Cloneable {
     @Autowired
-    BarrageService barrageService;
+    PandaBarrageService pandaBarrageService;
     //WebSocket
     @Autowired
     SimpMessagingTemplate template;
@@ -194,7 +194,7 @@ public class PandaTvCrawl implements Runnable,Cloneable {
         pandaBarrage.setLevel(Integer.parseInt(level));
         pandaBarrage.setIdentity(Integer.parseInt(identity));
         pandaBarrage.setSpidentity(Integer.parseInt(spidentity));
-        barrageService.save(pandaBarrage);
+        pandaBarrageService.save(pandaBarrage);
         template.convertAndSend("/topic/panda/" + roomid, "<a href='"+rid+"'>"+nickname+":</a>"+content);
         log.debug(roomid + "[" + nickname + "]:" + content);
     }

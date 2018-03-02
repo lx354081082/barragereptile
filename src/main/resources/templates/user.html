@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+    <meta charset="UTF-8"/>
+    <title>弹幕</title>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/bootstrap/bootstrap-table.css" rel="stylesheet"/>
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/bootstrap-table.js"></script>
+    <script type="text/javascript">
+        function run() {
+            ajaxuser();
+        }
+        //bootstrapTable加载表格
+        $(function () {
+
+        });
+
+        function ajaxuser() {
+            //清楚Table
+            $("#table").bootstrapTable('destroy');
+            $("#table").bootstrapTable({
+                url: '/user/listByName',         //请求后台的URL（*）
+                method: 'get',                      //请求方式（*）
+                //toolbar: '#toolbar',                //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: false,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParams: function(params) {
+                    return {
+                        //说明：传入后台的参数包括offset开始索引，limit步长，sort排序列，order：desc或者,以及所有列的键值对
+                        limit : params.limit,
+                        offset : params.offset,
+                        username : $("#username").val()
+                    };
+                },//传递参数（*）
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                       //初始化加载第一页，默认第一页
+                pageSize: 10,                       //每页的记录行数（*）
+                pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                showColumns: true,                  //是否显示所有的列
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+
+                // rowStyle: function (row, index) {
+                //     //这里有5个取值代表5中颜色['active', 'success', 'info', 'warning', 'danger'];
+                //     var strclass = "";
+                //     if (row.ORDER_STATUS == "待排产") {
+                //         strclass = 'success';//还有一个active
+                //     }
+                //     else if (row.ORDER_STATUS == "已删除") {
+                //         strclass = 'danger';
+                //     }
+                //     else {
+                //         return {};
+                //     }
+                //     return { classes: strclass }
+                // },
+                columns: [{
+                    field: 'userid',
+                    title: 'id'
+                }, {
+                    field: 'username',
+                    title: '用户名'
+                }, {
+                    field: 'where',
+                    title: '平台'
+                } ]
+
+            });
+        }
+    </script>
+</head>
+<body style="height: 100%">
+    <div class="container-fluid" style="height: 100%">
+        <div class="row clearfix" style="height: 100%">
+            <div class="col-md-12 column" style="height: 100%">
+                <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">弹幕抓取 by Lx</a>
+                    </div>
+
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li>
+                                <a href="index">弹幕</a>
+                            </li>
+                            <li class="active">
+                                <a href="user">用户分析</a>
+                            </li>
+                            <form class="navbar-form navbar-left" role="search">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="请输入用户名" id="username"/>
+                                </div>
+                                <select class="form-control" id="who">
+                                    <option value="all">全部</option>
+                                    <option value="douyu">斗鱼</option>
+                                    <option value="panda">熊猫</option>
+                                </select>
+                                <button type="button" class="btn btn-default" onclick="run()">用户名查询</button>
+                            </form>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a href="#">后台</a>
+                            </li>
+                            <li>
+                                <a href="#">登录</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="row clearfix" style="height: 100%">
+                    <div class="col-md-12 column"  style="height: 100%;padding-top: 50px;box-sizing: border-box">
+                        <div id="table">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
