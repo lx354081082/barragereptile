@@ -4,5 +4,9 @@ import com.lx.barragereptile.dto.UserDTO;
 import com.lx.barragereptile.util.PageBean;
 
 public interface UserService {
-    PageBean<UserDTO> selectByName(PageBean<UserDTO> pageBean, String username, Integer offset, Integer limit);
+    PageBean<UserDTO> selectPandaByName(PageBean<UserDTO> pageBean, String username, Integer offset, Integer limit);
+
+    PageBean<UserDTO> selectDouyuByName(PageBean<UserDTO> pageBean, String username, Integer offset, Integer limit);
+
+    int barrageToUser();
 }

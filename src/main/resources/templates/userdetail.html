@@ -6,60 +6,15 @@
     <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
     <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/bootstrap/bootstrap-table.css" rel="stylesheet"/>
     <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/bootstrap-table.js"></script>
     <script type="text/javascript">
-        function connect(type,roomid) {
-            var socket = new SockJS('/websocket');
-            stompClient = Stomp.over(socket);
-            stompClient.connect({},function (frame) {
-                //订阅消息
-                stompClient.subscribe('/topic/'+type+'/'+roomid,function (message) {
-                    showMessage(message.body);
-                });
-            })
-        }
-
-        function showMessage(message){
-            //加载数据
-            $("#dm").append("<li>"+message+"</li>");
-            //滚到底部
-            $("#toDow").scrollTop($("#toDow")[0].scrollHeight);
-        }
-
-        $(function () {
-            // connect(10015);
-        });
-        function pandaTv(num) {
-            var rid = $(".roomid:eq("+num+")").val();
-            $.get(
-                "/panda/"+rid,
-                {},
-                function (data) {
-                    connect(num,'panda',rid);
-                }
-            );
-        }
-        function douyuTv(num) {
-            var rid = $(".roomid:eq("+num+")").val();
-            $.get(
-                "/douyu/"+rid,
-                {},
-                function (data) {
-                    connect(num,'douyu',rid);
-                }
-            );
-        }
         function run() {
-            var rid = $("#roomid").val();
-            var who = $("#who").val();
-            $.get(
-                "/"+who+"/"+rid,
-                {},
-                function (data) {
-                    connect(who,rid);
-                }
-            );
+            var where = $("#where").val();
+            var id = $("#uid").val();
+            location.href = "/userdetail/"+where+"/"+id;
         }
     </script>
 </head>
@@ -74,24 +29,24 @@
 
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
-                            <li class="active">
+                            <li>
                                 <a href="index">弹幕</a>
                             </li>
-                            <li>
+                            <li >
                                 <a href="user">用户查找</a>
                             </li>
-                            <li>
+                            <li class="active">
                                 <a href="userdetail">用户详情</a>
                             </li>
-                            <form class="navbar-form navbar-left" role="search">
+                            <form class="navbar-form navbar-left" role="search" id="fms">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="请输入房间号" id="roomid"/>
+                                    <input type="text" class="form-control" placeholder="请输入UID" id="uid" onkeydown="if(event.keyCode==13)return false;"/>
                                 </div>
-                                <select class="form-control" id="who">
+                                <select class="form-control" id="where">
                                     <option value="douyu">斗鱼</option>
                                     <option value="panda">熊猫</option>
                                 </select>
-                                <button type="button" class="btn btn-default" onclick="run()">start</button>
+                                <button type="button" class="btn btn-default" onclick="run()">查询</button>
                             </form>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
@@ -105,10 +60,16 @@
                     </div>
                 </nav>
                 <div class="row clearfix" style="height: 100%">
-                    <div class="col-md-12 column"  style="height: 100%">
-                        <div id="toDow" style="overflow:auto;height: 100%;width:100%;padding-top: 50px;box-sizing: border-box">
-                            <ul class="list-group" id="dm">
-                            </ul>
+                    <div class="col-md-12 column"  style="height: 100%;padding-top: 50px;box-sizing: border-box">
+                        <div class="col-md-6">
+                            <div id="douyutable">
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="pandatable">
+
+                            </div>
                         </div>
                     </div>
                 </div>

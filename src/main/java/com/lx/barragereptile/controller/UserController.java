@@ -24,11 +24,22 @@ public class UserController {
     }
 
 
+    /**
+     * 模糊查用户
+     * @param limit 步长
+     * @param offset 其实角标
+     * @param username 用户名
+     * @param where 平台(douyu,panda)
+     */
     @GetMapping("/listByName")
     @ResponseBody
-    Object listByName(Integer limit, Integer offset, String username) {
-        PageBean<UserDTO> pageBean = userService.selectByName(new PageBean<UserDTO>(), username, offset, limit);
-
+    Object listByName(Integer limit, Integer offset, String username,String where) {
+        PageBean<UserDTO> pageBean = new PageBean<>();
+        if (UserDTO.DOUYU.equals(where)) {
+            pageBean = userService.selectDouyuByName(pageBean, username, offset, limit);
+        } else if (UserDTO.PANDA.equals(where)) {
+            pageBean = userService.selectPandaByName(pageBean, username, offset, limit);
+        }
         return pageBean;
     }
 }
