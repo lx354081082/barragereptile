@@ -43,6 +43,12 @@ public class BarrageServiceImpl implements BarrageService {
         return pageBean;
     }
 
+    @Override
+    public PageBean<UserBarrageDTO> selectBarrage(String where, Integer roomid, String who) {
+
+        return null;
+    }
+
     private void toDTO(List<UserBarrageDTO> userBarrageDTOList, List<Object[]> objects) {
         for (Object[] o : objects) {
             UserBarrageDTO userBarrageDTO = new UserBarrageDTO();

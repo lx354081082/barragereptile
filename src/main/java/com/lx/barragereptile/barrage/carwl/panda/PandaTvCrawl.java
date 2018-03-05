@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lx.barragereptile.pojo.PandaBarrage;
 import com.lx.barragereptile.service.PandaBarrageService;
+import com.lx.barragereptile.service.RedisService;
 import com.lx.barragereptile.util.DateFormatUtils;
 import lombok.extern.log4j.Log4j;
 import org.jsoup.Jsoup;
@@ -32,6 +33,8 @@ public class PandaTvCrawl implements Runnable,Cloneable {
     //WebSocket
     @Autowired
     SimpMessagingTemplate template;
+    @Autowired
+    RedisService redisService;
 
 
     private String roomId = "10015";
@@ -190,8 +193,13 @@ public class PandaTvCrawl implements Runnable,Cloneable {
         pandaBarrage.setRoomid(roomid);
         pandaBarrage.setDate(DateFormatUtils.parseUnixTimeToData(time));
         pandaBarrage.setLevel(Integer.parseInt(level));
+        //持久化
         pandaBarrageService.save(pandaBarrage);
-        template.convertAndSend("/topic/panda/" + roomid, "<a href='"+rid+"'>"+nickname+":</a>"+content);
+        //webSocket
+        template.convertAndSend("/topic/panda/" + roomid, "<a href='" + rid + "'>" + nickname + ":</a>" + content);
+        //redis
+        String val = JSON.toJSONString(pandaBarrage);
+        redisService.saveBarrage("panda" + pandaBarrage.getRoomid(), val);
         log.debug(roomid + "[" + nickname + "]:" + content);
     }
 

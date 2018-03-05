@@ -1,4 +1,4 @@
-package com.lx.barragereptile.config.websocket;
+package com.lx.barragereptile.controller;
 
 import com.lx.barragereptile.barrage.carwl.douyu.DouyuTvCrawl;
 import com.lx.barragereptile.barrage.carwl.panda.PandaTvCrawl;

@@ -1,4 +1,4 @@
-package com.lx.barragereptile.config.websocket;
+package com.lx.barragereptile.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

@@ -7,6 +7,14 @@ spring:
     url: jdbc:mysql://localhost:3306/barrage?characterEncoding=utf8
     username: root
     password: root
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    timeout: -1
+    sentinel:
+      master: barrage
+      nodes:
   jpa:
     hibernate:
       ddl-auto: update

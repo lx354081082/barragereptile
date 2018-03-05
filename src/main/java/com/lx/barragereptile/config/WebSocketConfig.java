@@ -1,4 +1,4 @@
-package com.lx.barragereptile.config.websocket;
+package com.lx.barragereptile.config;
 
 import lombok.extern.log4j.Log4j;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,6 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 
 @Configuration
 @EnableWebSocketMessageBroker
-@Log4j
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
     /**
@@ -38,28 +37,5 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
     }
 
-
-//    @Override
-//    public void configureWebSocketTransport(final WebSocketTransportRegistration registration) {
-//        registration.addDecoratorFactory(new WebSocketHandlerDecoratorFactory() {
-//            @Override
-//            public WebSocketHandler decorate(final WebSocketHandler barragehandler) {
-//                return new WebSocketHandlerDecorator(barragehandler) {
-//                    @Override
-//                    public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
-//                        // 客户端与服务器端建立连接后，此处记录谁上线了
-//                        super.afterConnectionEstablished(session);
-//                    }
-//
-//                    @Override
-//                    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-//                        // 客户端与服务器端断开连接后，此处记录谁下线了
-//                        super.afterConnectionClosed(session, closeStatus);
-//                    }
-//                };
-//            }
-//        });
-//        super.configureWebSocketTransport(registration);
-//    }
 
 }

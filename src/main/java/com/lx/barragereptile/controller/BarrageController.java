@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@ResponseBody
 public class BarrageController {
     @Autowired
     PandaTvCrawl pandaTvCrawl;
@@ -25,17 +26,11 @@ public class BarrageController {
     @Autowired
     BarrageService barrageService;
 
-    @GetMapping("index")
-    String index() {
-        return "index";
-    }
-
 
     /**
      * 创建任务
      */
     @GetMapping("/panda/{roomid}")
-    @ResponseBody
     Object roomid(@PathVariable("roomid") String roomid) {
         pandaTvCrawl.setRoomId(roomid);
         //判断是否有次线程
@@ -58,7 +53,6 @@ public class BarrageController {
      * 创建任务
      */
     @GetMapping("/douyu/{roomid}")
-    @ResponseBody
     Object rid(@PathVariable("roomid") String roomid) {
         douyuTvCrawl.setRoomId(roomid);
         //判断是否有次线程
@@ -77,14 +71,19 @@ public class BarrageController {
         return true;
     }
 
-    @GetMapping("/stop/{roomid}")
-    @ResponseBody
-    Object stop(@PathVariable("roomid") String roomid) {
-        Long threadId = jobService.getThreadIdByRoomId(roomid);
-        if (threadId != null) {
-            return ThreadUtils.interruptThreadByThreadId(threadId);
-        }
-        return false;
-    }
+//    @GetMapping("/stop/{roomid}")
+//    @ResponseBody
+//    Object stop(@PathVariable("roomid") String roomid) {
+//        Long threadId = jobService.getThreadIdByRoomId(roomid);
+//        if (threadId != null) {
+//            return ThreadUtils.interruptThreadByThreadId(threadId);
+//        }
+//        return false;
+//    }
 
+    @GetMapping("/barrage/find")
+    Object fing(String where, Integer roomid, String who) {
+        barrageService.selectBarrage(where, roomid, who);
+        return "";
+    }
 }

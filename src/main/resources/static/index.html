@@ -28,7 +28,6 @@
         }
 
         $(function () {
-            // connect(10015);
         });
         function pandaTv(num) {
             var rid = $(".roomid:eq("+num+")").val();
@@ -75,16 +74,24 @@
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
                             <li class="active">
-                                <a href="/index">实时弹幕</a>
+                                <a href="/index.html">实时弹幕</a>
                             </li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">用户<strong class="caret"></strong></a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="/user">用户查找</a>
+                                        <a href="/user.html">用户查找</a>
                                     </li>
                                     <li>
                                         <a href="/userdetail">用户详情</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">弹幕<strong class="caret"></strong></a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="/barrage.html">模糊搜索</a>
                                     </li>
                                 </ul>
                             </li>

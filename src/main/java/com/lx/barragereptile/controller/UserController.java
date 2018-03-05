@@ -23,12 +23,6 @@ public class UserController {
     @Autowired
     BarrageService barrageService;
 
-    @GetMapping("")
-    String index() {
-        return "user";
-    }
-
-
     /**
      * 模糊查用户
      * @param limit 步长

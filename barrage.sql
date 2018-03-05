@@ -1,3 +1,18 @@
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : 1.0.0.111
+ Source Server Type    : MySQL
+ Source Server Version : 50721
+ Source Host           : 1.0.0.111:3306
+ Source Schema         : barrage
+
+ Target Server Type    : MySQL
+ Target Server Version : 50721
+ File Encoding         : 65001
+
+ Date: 25/02/2018 16:48:37
+*/
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -15,16 +30,16 @@ CREATE TABLE `douyu_barrage`  (
   `date` datetime(0) NULL DEFAULT NULL,
   `level` int(11) NULL DEFAULT 1,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4348076 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for douyu_user
 -- ----------------------------
 DROP TABLE IF EXISTS `douyu_user`;
 CREATE TABLE `douyu_user`  (
-  `u_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `u_id` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `level` int(11) NOT NULL,
-  `u_name` varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+  `u_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
   PRIMARY KEY (`u_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
@@ -73,7 +88,7 @@ CREATE TABLE `panda_barrage`  (
   `date` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP,
   `level` int(11) NULL DEFAULT 1,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1808754 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for panda_user
@@ -81,7 +96,7 @@ CREATE TABLE `panda_barrage`  (
 DROP TABLE IF EXISTS `panda_user`;
 CREATE TABLE `panda_user`  (
   `u_id` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `level` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+  `level` int(11) NULL DEFAULT NULL,
   `u_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
   PRIMARY KEY (`u_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
