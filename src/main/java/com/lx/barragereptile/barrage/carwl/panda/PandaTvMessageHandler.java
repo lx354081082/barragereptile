@@ -1,4 +1,4 @@
-package com.lx.barragereptile.barrage.handler.panda;
+package com.lx.barragereptile.barrage.carwl.panda;
 
 import com.lx.barragereptile.util.Utils;
 

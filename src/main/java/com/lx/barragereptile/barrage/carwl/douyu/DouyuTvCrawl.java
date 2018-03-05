@@ -1,20 +1,16 @@
-package com.lx.barragereptile.barrage.handler.douyu;
+package com.lx.barragereptile.barrage.carwl.douyu;
 
-import com.lx.barragereptile.barrage.handler.douyu.msg.DyMessage;
-import com.lx.barragereptile.barrage.handler.douyu.msg.MsgView;
+import com.lx.barragereptile.barrage.carwl.douyu.msg.DyMessage;
+import com.lx.barragereptile.barrage.carwl.douyu.msg.MsgView;
 import com.lx.barragereptile.pojo.DouyuBarrage;
 import com.lx.barragereptile.service.DouyuBarrageService;
-import com.lx.barragereptile.util.Utils;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
-import org.omg.PortableInterceptor.LOCATION_FORWARD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.Id;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -238,7 +234,6 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
             String brid = (String) msg.get("brid");
 
             DouyuBarrage douyuBarrage = new DouyuBarrage();
-            douyuBarrage.setId(Utils.getId());
             douyuBarrage.setUid(uid);
             douyuBarrage.setUname(name);
             douyuBarrage.setRoomid(rid);
@@ -255,7 +250,7 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
     }
 
     /**
-     * 运行流程
+     * 运行主流程
      */
     @Override
     public void run() {

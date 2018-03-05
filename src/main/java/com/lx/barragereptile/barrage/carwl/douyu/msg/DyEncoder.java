@@ -1,4 +1,4 @@
-package com.lx.barragereptile.barrage.handler.douyu.msg;
+package com.lx.barragereptile.barrage.carwl.douyu.msg;
 
 /**
  * @Summary: 弹幕协议格式化类

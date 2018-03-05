@@ -1,9 +1,12 @@
 package com.lx.barragereptile.controller;
 
-import com.lx.barragereptile.barrage.handler.douyu.DouyuTvCrawl;
-import com.lx.barragereptile.barrage.handler.panda.PandaTvCrawl;
+import com.lx.barragereptile.barrage.carwl.douyu.DouyuTvCrawl;
+import com.lx.barragereptile.barrage.carwl.panda.PandaTvCrawl;
+import com.lx.barragereptile.dto.UserBarrageDTO;
 import com.lx.barragereptile.pojo.Job;
+import com.lx.barragereptile.service.BarrageService;
 import com.lx.barragereptile.service.JobService;
+import com.lx.barragereptile.util.PageBean;
 import com.lx.barragereptile.util.ThreadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +22,8 @@ public class BarrageController {
     DouyuTvCrawl douyuTvCrawl;
     @Autowired
     JobService jobService;
+    @Autowired
+    BarrageService barrageService;
 
     @GetMapping("index")
     String index() {
@@ -34,15 +39,15 @@ public class BarrageController {
     Object roomid(@PathVariable("roomid") String roomid) {
         pandaTvCrawl.setRoomId(roomid);
         //判断是否有次线程
-        if (jobService.isHave("panda"+roomid)) {
+        if (jobService.isHave("panda" + roomid)) {
             return true;
         }
         //创建线程 线程名字为房间id
-        Thread thread = new Thread(pandaTvCrawl, "panda"+roomid);
+        Thread thread = new Thread(pandaTvCrawl, "panda" + roomid);
         thread.start();
 
         Job job = new Job();
-        job.setRoomid("panda"+roomid);
+        job.setRoomid("panda" + roomid);
         job.setThreadid(thread.getId());
         jobService.save(job);
 
@@ -57,7 +62,7 @@ public class BarrageController {
     Object rid(@PathVariable("roomid") String roomid) {
         douyuTvCrawl.setRoomId(roomid);
         //判断是否有次线程
-        if (jobService.isHave("douyu"+roomid)) {
+        if (jobService.isHave("douyu" + roomid)) {
             return true;
         }
 
@@ -65,7 +70,7 @@ public class BarrageController {
         thread.start();
 
         Job job = new Job();
-        job.setRoomid("douyu"+roomid);
+        job.setRoomid("douyu" + roomid);
         job.setThreadid(thread.getId());
         jobService.save(job);
 
@@ -81,4 +86,5 @@ public class BarrageController {
         }
         return false;
     }
+
 }

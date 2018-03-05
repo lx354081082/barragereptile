@@ -9,7 +9,7 @@ import javax.persistence.Id;
 @Entity
 @Data
 @DynamicUpdate
-public class DouyuUsre {
+public class DouyuUser {
     @Id
     private String uId;
     private String uName;

@@ -1,23 +1,18 @@
 package com.lx.barragereptile.config.websocket;
 
-import com.lx.barragereptile.barrage.handler.douyu.DouyuTvCrawl;
-import com.lx.barragereptile.barrage.handler.panda.PandaTvCrawl;
+import com.lx.barragereptile.barrage.carwl.douyu.DouyuTvCrawl;
+import com.lx.barragereptile.barrage.carwl.panda.PandaTvCrawl;
 import com.lx.barragereptile.pojo.Job;
 import com.lx.barragereptile.service.JobService;
 import com.lx.barragereptile.service.UserService;
 import com.lx.barragereptile.util.ThreadUtils;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -61,7 +56,6 @@ public class WebSocketController {
 
             //无此线程就创建相应线程
             if (threadName != null && threadName.equals(j.getRoomid())) {
-                log.info("线程守护-->" + j.getRoomid() + "正在运行");
                 continue;
             } else {
                 //克隆对象 建立线程
@@ -80,9 +74,10 @@ public class WebSocketController {
                     thread.start();
                     j.setThreadid(thread.getId());
                     jobService.update(j);
-                }log.info("线程守护-->" + j.getRoomid() + "创建成功");
+                }
             }
         }
+        log.info("线程守护-->"+allJob.size()+"个任务正在运行");
     }
 
     /**
@@ -90,6 +85,10 @@ public class WebSocketController {
      */
     @Scheduled(fixedRate = 60000000)
     public void barrageToUser() {
-        userService.barrageToUser();
+        long start = System.currentTimeMillis();
+        int i = userService.barrageToUser();
+        long end = System.currentTimeMillis();
+
+        log.info("用户详情更新,处理弹幕数据"+i+"条,用时:"+(end-start)+"ms");
     }
 }

@@ -4,6 +4,8 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.Date;
 
@@ -11,8 +13,10 @@ import java.util.Date;
 @Data
 @DynamicUpdate
 public class DouyuBarrage {
+    //id自增长
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String uid;
     private String uname;
     private String txt;

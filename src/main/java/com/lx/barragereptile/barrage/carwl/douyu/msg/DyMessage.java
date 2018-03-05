@@ -1,6 +1,6 @@
-package com.lx.barragereptile.barrage.handler.douyu.msg;
+package com.lx.barragereptile.barrage.carwl.douyu.msg;
 
-import com.lx.barragereptile.barrage.handler.utils.FormatTransfer;
+import com.lx.barragereptile.barrage.carwl.utils.FormatTransfer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;

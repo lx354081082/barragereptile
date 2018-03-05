@@ -9,9 +9,9 @@ import javax.persistence.Id;
 @Entity
 @Data
 @DynamicUpdate
-public class PandaUsre {
+public class PandaUser {
     @Id
     private String uId;
     private String uName;
-    private String level;
+    private Integer level;
 }

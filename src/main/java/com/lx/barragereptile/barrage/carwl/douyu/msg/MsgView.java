@@ -1,4 +1,4 @@
-package com.lx.barragereptile.barrage.handler.douyu.msg;
+package com.lx.barragereptile.barrage.carwl.douyu.msg;
 
 import org.apache.commons.lang3.StringUtils;
 

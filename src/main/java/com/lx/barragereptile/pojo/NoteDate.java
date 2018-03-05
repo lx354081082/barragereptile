@@ -5,12 +5,14 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.Date;
 
 @Entity
 @Data
 @DynamicUpdate
-public class Notes {
+public class NoteDate {
     @Id
-    private String key;
+    private String noteId;
     private String val;
+    private Date date;
 }

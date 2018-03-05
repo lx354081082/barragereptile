@@ -1,4 +1,4 @@
-package com.lx.barragereptile.barrage.handler.panda;
+package com.lx.barragereptile.barrage.carwl.panda;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.lx.barragereptile.pojo.PandaBarrage;
 import com.lx.barragereptile.service.PandaBarrageService;
 import com.lx.barragereptile.util.DateFormatUtils;
-import com.lx.barragereptile.util.Utils;
 import lombok.extern.log4j.Log4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -189,11 +188,8 @@ public class PandaTvCrawl implements Runnable,Cloneable {
         pandaBarrage.setRid(rid);
         pandaBarrage.setNickname(nickname);
         pandaBarrage.setRoomid(roomid);
-        pandaBarrage.setId(Utils.getId());
         pandaBarrage.setDate(DateFormatUtils.parseUnixTimeToData(time));
         pandaBarrage.setLevel(Integer.parseInt(level));
-        pandaBarrage.setIdentity(Integer.parseInt(identity));
-        pandaBarrage.setSpidentity(Integer.parseInt(spidentity));
         pandaBarrageService.save(pandaBarrage);
         template.convertAndSend("/topic/panda/" + roomid, "<a href='"+rid+"'>"+nickname+":</a>"+content);
         log.debug(roomid + "[" + nickname + "]:" + content);
