@@ -1,13 +1,16 @@
-package com.lx.barragereptile.barrage.carwl.panda;
+package com.lx.barragereptile.thread;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.lx.barragereptile.thread.util.panda.PandaTvMessageHandler;
+import com.lx.barragereptile.po.RedisBarrage;
 import com.lx.barragereptile.pojo.PandaBarrage;
 import com.lx.barragereptile.service.PandaBarrageService;
 import com.lx.barragereptile.service.RedisService;
+import com.lx.barragereptile.util.BarrageConstant;
 import com.lx.barragereptile.util.DateFormatUtils;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +29,8 @@ import java.util.List;
  */
 @Component
 @Scope("prototype")
-@Log4j
-public class PandaTvCrawl implements Runnable,Cloneable {
+@Slf4j
+public class PandaTvCrawlThread implements Runnable,Cloneable {
     @Autowired
     PandaBarrageService pandaBarrageService;
     //WebSocket
@@ -66,8 +69,8 @@ public class PandaTvCrawl implements Runnable,Cloneable {
         Document document;
         try {
             document = Jsoup.connect(url).get();
-            log.info("从[" + url + "]获取登录弹幕服务器的必要信息");
-            log.info("登录数据Json串：" + document.body().text());
+            log.debug("从[" + url + "]获取登录弹幕服务器的必要信息");
+            log.debug("登录数据Json串：" + document.body().text());
         } catch (IOException e) {
             log.error("获取登录服务器的必要数据出错", e);
             return false;
@@ -84,7 +87,7 @@ public class PandaTvCrawl implements Runnable,Cloneable {
             authType = tempJsonObject.getString("authType");
 
             JSONArray chatAddressList = tempJsonObject.getJSONArray("chat_addr_list");
-            log.info("弹幕服务器数据：" + chatAddressList);
+            log.debug("弹幕服务器数据：" + chatAddressList);
             //选第一个服务器登录
             serverIp = chatAddressList.getString(0).split(":",2)[0];
             port = Integer.parseInt(chatAddressList.getString(0).split(":", 2)[1]);
@@ -171,13 +174,11 @@ public class PandaTvCrawl implements Runnable,Cloneable {
             } catch (IOException e) {
                 log.error("调用MessageHandler close()方法时出错");
             }
+            return;
         }
     }
 
-    /**
-     * 弹幕信息处理
-     */
-    private void handlerChatmsg(JSONObject msgJsonObject) {
+    private void toPoJo(JSONObject msgJsonObject, PandaBarrage pandaBarrage) {
         String time = msgJsonObject.getString("time");
         String nickname = msgJsonObject.getJSONObject("data").getJSONObject("from").getString("nickName");
         String rid = msgJsonObject.getJSONObject("data").getJSONObject("from").getString("rid");
@@ -186,28 +187,38 @@ public class PandaTvCrawl implements Runnable,Cloneable {
         String level = msgJsonObject.getJSONObject("data").getJSONObject("from").getString("level");
         String identity = msgJsonObject.getJSONObject("data").getJSONObject("from").getString("identity");
         String spidentity = msgJsonObject.getJSONObject("data").getJSONObject("from").getString("sp_identity");
-        PandaBarrage pandaBarrage = new PandaBarrage();
         pandaBarrage.setContent(content);
         pandaBarrage.setRid(rid);
         pandaBarrage.setNickname(nickname);
         pandaBarrage.setRoomid(roomid);
         pandaBarrage.setDate(DateFormatUtils.parseUnixTimeToData(time));
         pandaBarrage.setLevel(Integer.parseInt(level));
-        //持久化
-        pandaBarrageService.save(pandaBarrage);
+    }
+
+    /**
+     * 弹幕信息处理
+     */
+    private void handlerChatmsg(JSONObject msgJsonObject) {
+        PandaBarrage pandaBarrage = new PandaBarrage();
+        toPoJo(msgJsonObject, pandaBarrage);
+
+//        //持久化
+//        pandaBarrageService.save(pandaBarrage);
         //webSocket
-        template.convertAndSend("/topic/panda/" + roomid, "<a href='" + rid + "'>" + nickname + ":</a>" + content);
+        template.convertAndSend("/topic/panda/" + pandaBarrage.getRoomid(), "<a href='/userdetail/panda/" + pandaBarrage.getRid() + "'>" + pandaBarrage.getNickname() + ":</a>" + pandaBarrage.getContent());
         //redis
         String val = JSON.toJSONString(pandaBarrage);
-        redisService.saveBarrage("panda" + pandaBarrage.getRoomid(), val);
-        log.debug(roomid + "[" + nickname + "]:" + content);
+//        redisService.saveBarrage("panda" + pandaBarrage.getRoomid(), val);
+
+        redisService.lPush(BarrageConstant.BARRAGE, new RedisBarrage(BarrageConstant.PANDA, pandaBarrage));
+//        log.debug(roomid + "[" + nickname + "]:" + content);
     }
 
     /**
      * 克隆对象 循环创建该类线程会出现多个线程引用同一对象的问题
      */
     @Override
-    public PandaTvCrawl clone() throws CloneNotSupportedException {
-        return (PandaTvCrawl) super.clone();
+    public PandaTvCrawlThread clone() throws CloneNotSupportedException {
+        return (PandaTvCrawlThread) super.clone();
     }
 }

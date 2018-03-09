@@ -4,7 +4,7 @@ spring:
     cache: false
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/barrage?characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/barrage?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
     username: root
     password: root
   redis:
@@ -12,9 +12,9 @@ spring:
     host: 127.0.0.1
     port: 6379
     timeout: -1
-    sentinel:
-      master: barrage
-      nodes:
+#    sentinel:
+#      master: barrage
+#      nodes:
   jpa:
     hibernate:
       ddl-auto: update
@@ -26,4 +26,4 @@ server:
   port: 80
 logging:
   path: /java/log
-  level: info
+  level: error

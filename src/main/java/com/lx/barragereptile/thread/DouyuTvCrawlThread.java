@@ -1,10 +1,13 @@
-package com.lx.barragereptile.barrage.carwl.douyu;
+package com.lx.barragereptile.thread;
 
-import com.lx.barragereptile.barrage.carwl.douyu.msg.DyMessage;
-import com.lx.barragereptile.barrage.carwl.douyu.msg.MsgView;
+import com.lx.barragereptile.thread.util.douyu.DyMessage;
+import com.lx.barragereptile.thread.util.douyu.MsgView;
+import com.lx.barragereptile.po.RedisBarrage;
 import com.lx.barragereptile.pojo.DouyuBarrage;
 import com.lx.barragereptile.service.DouyuBarrageService;
-import lombok.extern.log4j.Log4j;
+import com.lx.barragereptile.service.RedisService;
+import com.lx.barragereptile.util.BarrageConstant;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -23,15 +26,17 @@ import java.util.Map;
 /**
  * 进行抓取弹幕任务
  */
-@Log4j
+@Slf4j
 @Component
 @Scope("prototype")
-public class DouyuTvCrawl implements Runnable,Cloneable {
+public class DouyuTvCrawlThread implements Runnable,Cloneable {
     //WebSocket
     @Autowired
     SimpMessagingTemplate template;
     @Autowired
     DouyuBarrageService douyuBarrageService;
+    @Autowired
+    RedisService redisService;
 
     //设置需要访问的房间ID信息
     private String roomId = "24422";
@@ -78,7 +83,7 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
         try {
             ots.write(joinGroupRequest, 0, joinGroupRequest.length);
             ots.flush();
-            log.info("加入弹幕池"+groupId+"成功");
+            log.debug("加入弹幕池"+groupId+"成功");
         } catch (IOException e) {
             e.printStackTrace();
             log.error("加入弹幕池"+groupId+"失败");
@@ -140,7 +145,7 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
             //向弹幕服务器发送心跳请求数据包
             ots.write(keepAliveRequest, 0, keepAliveRequest.length);
             ots.flush();
-            log.info("心跳包发送成功");
+            log.debug("心跳包发送成功");
 
     }
 
@@ -178,8 +183,11 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
             parseServerMsg(msgView.getMessageList());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            //todo
+            //结束线程
+            return;
         }
+
     }
     /**
      * 解析从服务器接受的信息，并根据需要订制业务需求
@@ -212,41 +220,44 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
      * 弹幕信息处理
      */
     private void handlerChatmsg(Map<String, Object> msg) {
+        DouyuBarrage douyuBarrage = new DouyuBarrage();
+        toPoJo(msg, douyuBarrage);
+
+        template.convertAndSend("/topic/douyu/" + douyuBarrage.getRoomid(), "<a href='/userdetail/douyu/" + douyuBarrage.getUid() + "'>" + douyuBarrage.getUname() + ":</a>" + douyuBarrage.getTxt());
+
+        redisService.lPush(BarrageConstant.BARRAGE, new RedisBarrage(BarrageConstant.DOUYU, douyuBarrage));
+
+    }
+
+    private void toPoJo(Map<String, Object> msg, DouyuBarrage douyuBarrage) {
+        //用户名
+        String name = (String) msg.get("nn");
+        //用户id
+        String uid = (String) msg.get("uid");
+        //用户等级
+        String level = (String) msg.get("level");
+        //房间id
+        String rid = (String) msg.get("rid");
+        //弹幕信息
+        String txt = null;
         try {
-            //用户名
-            String name = (String) msg.get("nn");
-            //用户id
-            String uid = (String) msg.get("uid");
-            //用户等级
-            String level = (String) msg.get("level");
-            //发言时间戳
-//        String cst = (String) msg.get("cst");
-            //房间id
-            String rid = (String) msg.get("rid");
-            //弹幕信息
-            String txt = null;
-            try {
-                txt = (String) msg.get("txt");
-            } catch (Exception e) {
-                txt = (String) msg.get("txt").toString();
-                txt = txt.substring(1, txt.length() - 2);
-            }
-            String brid = (String) msg.get("brid");
-
-            DouyuBarrage douyuBarrage = new DouyuBarrage();
-            douyuBarrage.setUid(uid);
-            douyuBarrage.setUname(name);
-            douyuBarrage.setRoomid(rid);
-            douyuBarrage.setDate(new Date());
-            douyuBarrage.setLevel(Integer.parseInt(level));
-            douyuBarrage.setTxt(txt);
-
-            douyuBarrageService.save(douyuBarrage);
-            //websockfas弹幕消息
-            template.convertAndSend("/topic/douyu/" + brid, "<a href='"+uid+"'>"+name+":</a>"+txt);
+            txt = (String) msg.get("txt");
         } catch (Exception e) {
-            log.error("弹幕处理异常==>" +e.getMessage()+"==>"+ msg.toString());
+            txt = (String) msg.get("txt").toString();
+            txt = txt.substring(1, txt.length() - 2);
+            log.info(e.getMessage());
         }
+        String brid = (String) msg.get("brid");
+
+        douyuBarrage.setUid(uid);
+        douyuBarrage.setUname(name);
+        douyuBarrage.setRoomid(rid);
+        douyuBarrage.setDate(new Date());
+        try {
+            douyuBarrage.setLevel(Integer.parseInt(level));
+        } catch (NumberFormatException e) {
+        }
+        douyuBarrage.setTxt(txt);
     }
 
     /**
@@ -271,7 +282,6 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
                     try {
                         Thread.sleep(45000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }
@@ -292,7 +302,7 @@ public class DouyuTvCrawl implements Runnable,Cloneable {
      * 克隆对象 循环创建该类线程会出现多个线程引用同一对象的问题
      */
     @Override
-    public DouyuTvCrawl clone() throws CloneNotSupportedException {
-        return (DouyuTvCrawl) super.clone();
+    public DouyuTvCrawlThread clone() throws CloneNotSupportedException {
+        return (DouyuTvCrawlThread) super.clone();
     }
 }

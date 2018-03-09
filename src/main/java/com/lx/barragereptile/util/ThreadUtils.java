@@ -24,16 +24,20 @@ public class ThreadUtils {
 
     /**
      * 根据线程name中断该线程
+     * 返回结果
      */
     public static synchronized boolean interruptThread(String threadName) {
+        //返回所有活动线程的堆栈跟踪图。
         Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
         Set<Thread> threads = allStackTraces.keySet();
+        Boolean flg = false;
         for (Thread t:threads) {
             if (threadName.equals(t.getName())) {
                 t.interrupt();
+                flg = true;
             }
         }
-        return true;
+        return flg;
     }
 
     /**

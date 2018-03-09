@@ -46,4 +46,9 @@ public class JobServiceImpl implements JobService {
     public void update(Job job) {
         jobRepository.save(job);
     }
+
+    @Override
+    public void delByRoomid(String rommid) {
+        jobRepository.delete(rommid);
+    }
 }

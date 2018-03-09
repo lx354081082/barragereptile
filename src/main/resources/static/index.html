@@ -12,7 +12,9 @@
         function connect(type,roomid) {
             var socket = new SockJS('/websocket');
             stompClient = Stomp.over(socket);
+            //订阅新地址
             stompClient.connect({},function (frame) {
+
                 //订阅消息
                 stompClient.subscribe('/topic/'+type+'/'+roomid,function (message) {
                     showMessage(message.body);
@@ -27,8 +29,6 @@
             $("#toDow").scrollTop($("#toDow")[0].scrollHeight);
         }
 
-        $(function () {
-        });
         function pandaTv(num) {
             var rid = $(".roomid:eq("+num+")").val();
             $.get(
@@ -108,7 +108,7 @@
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                             <li>
-                                <a href="#">后台</a>
+                                <a href="/admin.html">后台</a>
                             </li>
                             <li>
                                 <a href="#">登录</a>

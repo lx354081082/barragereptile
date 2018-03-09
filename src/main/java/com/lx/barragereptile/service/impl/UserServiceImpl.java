@@ -11,6 +11,7 @@ import com.lx.barragereptile.repository.NoteDateRepository;
 import com.lx.barragereptile.repository.PandaBarrageRepository;
 import com.lx.barragereptile.repository.PandaUserRepository;
 import com.lx.barragereptile.service.UserService;
+import com.lx.barragereptile.util.BarrageConstant;
 import com.lx.barragereptile.util.PageBean;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class UserServiceImpl implements UserService {
             pandaVal = Integer.parseInt(noteDatePanda.getVal());
         }
 
-        douyuUserRepository.barrageToUser(douyuVal, countDouyu-douyuVal);
+        douyuUserRepository.barrageToUser(douyuVal, countDouyu - douyuVal);
         pandaUserRepository.barrageToUser(pandaVal, countPanda - pandaVal);
 
         NoteDate newNoteDateDouyu = new NoteDate();
@@ -122,21 +123,21 @@ public class UserServiceImpl implements UserService {
         UserDetailDTO userDetailDTO = null;
         try {
 
-            if (where.equals(UserDTO.DOUYU)) {
+            if (where.equals(BarrageConstant.DOUYU)) {
                 DouyuUser one = douyuUserRepository.findOne(id);
                 userDetailDTO = new UserDetailDTO();
                 userDetailDTO.setLevel(one.getLevel());
                 userDetailDTO.setUid(one.getUId());
                 userDetailDTO.setUname(one.getUName());
-                userDetailDTO.setWhere(UserDTO.DOUYU);
+                userDetailDTO.setWhere(BarrageConstant.DOUYU);
             }
-            if (where.equals(UserDTO.PANDA)) {
+            if (where.equals(BarrageConstant.PANDA)) {
                 PandaUser one = pandaUserRepository.findOne(id);
                 userDetailDTO = new UserDetailDTO();
                 userDetailDTO.setLevel(one.getLevel());
                 userDetailDTO.setUid(one.getUId());
                 userDetailDTO.setUname(one.getUName());
-                userDetailDTO.setWhere(UserDTO.PANDA);
+                userDetailDTO.setWhere(BarrageConstant.PANDA);
             }
         } catch (Exception e) {
 
@@ -161,13 +162,13 @@ public class UserServiceImpl implements UserService {
     public PageBean<UserDTO> selectUserByWhere(String where, String username, Integer offset, Integer limit) {
         PageBean<UserDTO> pageBean = new PageBean<>();
         List<UserDTO> userDTOS = new ArrayList<>();
-        if (where.equals(UserDTO.DOUYU)) {
+        if (where.equals(BarrageConstant.DOUYU)) {
             List<Object[]> objects = douyuUserRepository.selectByName(username, offset, limit);
             toDTO(objects,userDTOS,"斗鱼");
             pageBean.setRows(userDTOS);
             pageBean.setTotal(douyuUserRepository.selectCountByName(username));
         }
-        if (where.equals(UserDTO.PANDA)) {
+        if (where.equals(BarrageConstant.PANDA)) {
             List<Object[]> objects = pandaUserRepository.selectByName(username, offset, limit);
             toDTO(objects,userDTOS,"熊猫");
             pageBean.setRows(userDTOS);

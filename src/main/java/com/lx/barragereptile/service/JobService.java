@@ -14,4 +14,6 @@ public interface JobService  {
     List<Job> getAll();
 
     void update(Job job);
+
+    void delByRoomid(String rommid);
 }

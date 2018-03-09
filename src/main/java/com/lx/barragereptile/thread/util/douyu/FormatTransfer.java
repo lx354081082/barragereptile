@@ -10,7 +10,7 @@
  *
  *  Revision Notes :
 */
-package com.lx.barragereptile.barrage.carwl.utils;
+package com.lx.barragereptile.thread.util.douyu;
 
 public   class  FormatTransfer
 {

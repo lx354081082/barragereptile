@@ -5,6 +5,7 @@ import com.lx.barragereptile.dto.UserDTO;
 import com.lx.barragereptile.repository.DouyuBarrageRepository;
 import com.lx.barragereptile.repository.PandaBarrageRepository;
 import com.lx.barragereptile.service.BarrageService;
+import com.lx.barragereptile.util.BarrageConstant;
 import com.lx.barragereptile.util.PageBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,12 @@ public class BarrageServiceImpl implements BarrageService {
     public PageBean<UserBarrageDTO> selectByUid(String where, String uid, Integer offset, Integer limit) {
         List<UserBarrageDTO> userBarrageDTOList = new ArrayList<>();
         int count = 0;
-        if (where.equals(UserDTO.DOUYU)) {
+        if (where.equals(BarrageConstant.DOUYU)) {
             List<Object[]> objects = douyuBarrageRepository.selectByUid(uid, offset, limit);
             toDTO(userBarrageDTOList, objects);
             count = douyuBarrageRepository.selectCountByUid(uid);
         }
-        if (where.equals(UserDTO.PANDA)) {
+        if (where.equals(BarrageConstant.PANDA)) {
             List<Object[]> objects = pandaBarrageRepository.selectByUid(uid, offset, limit);
             toDTO(userBarrageDTOList, objects);
             count = pandaBarrageRepository.selectCountByUid(uid);
