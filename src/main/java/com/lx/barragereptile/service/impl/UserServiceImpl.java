@@ -74,46 +74,46 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * 从弹幕表更新用户信息到用户表
-     */
-    @Override
-    public int barrageToUser() {
-        NoteDate noteDateDouyu = noteDateRepository.findOne("douyuBarrage");
-        NoteDate noteDatePanda = noteDateRepository.findOne("pandaBarrage");
-
-
-        //数据总量
-        Integer countDouyu = Math.toIntExact(douyuBarrageRepository.count());
-        Integer countPanda = Math.toIntExact(pandaBarrageRepository.count());
-
-        Integer douyuVal=0;
-        Integer pandaVal = 0;
-        if (noteDateDouyu != null) {
-            douyuVal = Integer.parseInt(noteDateDouyu.getVal());
-        }
-        if (noteDatePanda != null) {
-            pandaVal = Integer.parseInt(noteDatePanda.getVal());
-        }
-
-        douyuUserRepository.barrageToUser(douyuVal, countDouyu - douyuVal);
-        pandaUserRepository.barrageToUser(pandaVal, countPanda - pandaVal);
-
-        NoteDate newNoteDateDouyu = new NoteDate();
-        newNoteDateDouyu.setNoteId("douyuBarrage");
-        newNoteDateDouyu.setVal(countDouyu.toString());
-        newNoteDateDouyu.setDate(new Date());
-
-        NoteDate newNoteDatePanda = new NoteDate();
-        newNoteDatePanda.setNoteId("pandaBarrage");
-        newNoteDatePanda.setVal(countPanda.toString());
-        newNoteDatePanda.setDate(new Date());
-
-        noteDateRepository.save(newNoteDateDouyu);
-        noteDateRepository.save(newNoteDatePanda);
-
-        return (countDouyu - douyuVal) + (countPanda - pandaVal);
-    }
+//    /**
+//     * 从弹幕表更新用户信息到用户表
+//     */
+//    @Override
+//    public int barrageToUser() {
+//        NoteDate noteDateDouyu = noteDateRepository.findOne("douyuBarrage");
+//        NoteDate noteDatePanda = noteDateRepository.findOne("pandaBarrage");
+//
+//
+//        //数据总量
+//        Integer countDouyu = Math.toIntExact(douyuBarrageRepository.count());
+//        Integer countPanda = Math.toIntExact(pandaBarrageRepository.count());
+//
+//        Integer douyuVal=0;
+//        Integer pandaVal = 0;
+//        if (noteDateDouyu != null) {
+//            douyuVal = Integer.parseInt(noteDateDouyu.getVal());
+//        }
+//        if (noteDatePanda != null) {
+//            pandaVal = Integer.parseInt(noteDatePanda.getVal());
+//        }
+//
+//        douyuUserRepository.barrageToUser(douyuVal, countDouyu - douyuVal);
+//        pandaUserRepository.barrageToUser(pandaVal, countPanda - pandaVal);
+//
+//        NoteDate newNoteDateDouyu = new NoteDate();
+//        newNoteDateDouyu.setNoteId("douyuBarrage");
+//        newNoteDateDouyu.setVal(countDouyu.toString());
+//        newNoteDateDouyu.setDate(new Date());
+//
+//        NoteDate newNoteDatePanda = new NoteDate();
+//        newNoteDatePanda.setNoteId("pandaBarrage");
+//        newNoteDatePanda.setVal(countPanda.toString());
+//        newNoteDatePanda.setDate(new Date());
+//
+//        noteDateRepository.save(newNoteDateDouyu);
+//        noteDateRepository.save(newNoteDatePanda);
+//
+//        return (countDouyu - douyuVal) + (countPanda - pandaVal);
+//    }
 
     /**
      * 通过用户id查询用户信息

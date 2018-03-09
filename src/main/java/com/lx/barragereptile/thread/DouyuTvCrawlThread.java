@@ -183,7 +183,6 @@ public class DouyuTvCrawlThread implements Runnable,Cloneable {
             parseServerMsg(msgView.getMessageList());
 
         } catch (Exception e) {
-            //todo
             //结束线程
             return;
         }
@@ -223,8 +222,10 @@ public class DouyuTvCrawlThread implements Runnable,Cloneable {
         DouyuBarrage douyuBarrage = new DouyuBarrage();
         toPoJo(msg, douyuBarrage);
 
+        //webSocket send
         template.convertAndSend("/topic/douyu/" + douyuBarrage.getRoomid(), "<a href='/userdetail/douyu/" + douyuBarrage.getUid() + "'>" + douyuBarrage.getUname() + ":</a>" + douyuBarrage.getTxt());
 
+        //弹幕信息入列
         redisService.lPush(BarrageConstant.BARRAGE, new RedisBarrage(BarrageConstant.DOUYU, douyuBarrage));
 
     }
@@ -245,7 +246,7 @@ public class DouyuTvCrawlThread implements Runnable,Cloneable {
         } catch (Exception e) {
             txt = (String) msg.get("txt").toString();
             txt = txt.substring(1, txt.length() - 2);
-            log.info(e.getMessage());
+            log.debug(e.getMessage());
         }
         String brid = (String) msg.get("brid");
 

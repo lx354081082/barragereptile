@@ -26,6 +26,8 @@ import java.util.List;
 @Slf4j
 public class WebSocketController {
     @Autowired
+    SimpMessagingTemplate template;
+    @Autowired
     SimpMessagingTemplate messagingTemplate;
     @Autowired
     JobService jobService;
@@ -98,7 +100,7 @@ public class WebSocketController {
         Integer getval = redisService.getval(BarrageConstant.ALLBARRAGE);
         redisService.clean(BarrageConstant.ALLBARRAGE);
 //        log.info("10s弹幕总量统计---->" + getval);
-
+        template.convertAndSend("/topic/allBarrage",getval);
         //房间弹幕统计
         List<Job> all = jobService.getAll();
         for (Job j : all) {

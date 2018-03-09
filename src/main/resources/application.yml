@@ -10,6 +10,7 @@ spring:
   redis:
     database: 0
     host: 127.0.0.1
+#    host: 1.0.0.111
     port: 6379
     timeout: -1
 #    sentinel:

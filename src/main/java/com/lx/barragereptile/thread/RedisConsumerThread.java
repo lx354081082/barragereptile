@@ -2,6 +2,7 @@ package com.lx.barragereptile.thread;
 
 import com.alibaba.fastjson.JSON;
 import com.lx.barragereptile.po.RedisBarrage;
+import com.lx.barragereptile.po.RedisUser;
 import com.lx.barragereptile.pojo.DouyuBarrage;
 import com.lx.barragereptile.pojo.PandaBarrage;
 import com.lx.barragereptile.service.RedisService;
@@ -9,12 +10,17 @@ import com.lx.barragereptile.util.BarrageConstant;
 import com.lx.barragereptile.util.DateFormatUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.session.SessionProperties;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * redis任务队列消费线程
@@ -30,38 +36,88 @@ public class RedisConsumerThread implements Runnable {
 
     //私有全局变量
     private static ArrayList<RedisBarrage> redisBarrages = new ArrayList<>();
-    //todo:用户信息
-    private static List userlist = new ArrayList();
-
+    //全局用户信息
+    private static Map<String, RedisUser> pandaUser = new HashMap<>();
+    private static Map<String, RedisUser> douyuUser = new HashMap<>();
 
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            RedisBarrage rpop = redisService.rpop(BarrageConstant.BARRAGE);
+            try {
+                RedisBarrage rpop = redisService.rpop(BarrageConstant.BARRAGE);
 
-            //弹幕数据放入数组待用
-            redisBarrages.add(rpop);
+                //弹幕数据放入数组待用
+                redisBarrages.add(rpop);
 
-            //统计弹幕信息
-            count(rpop);
+                //统计弹幕信息
+                count(rpop);
 
 
-            //数量超过50 批量存数据库
-            if (redisBarrages.size() >= 50) {
-                try {
-                    toDb(redisBarrages);
-                } catch (Exception e) {
-                    log.error(e.getLocalizedMessage());
+                //数量超过400 批量存数据库
+                if (redisBarrages.size() >= 2000) {
+                    try {
+                        toDb();
+                    } catch (Exception e) {
+                        log.error(e.getLocalizedMessage());
+                    }
+                    redisBarrages.clear();
                 }
-                redisBarrages.clear();
+                //panda用户信息持久化
+                if (pandaUser.size() >= 1000) {
+                    toPandaDb();
+                    pandaUser.clear();
+                }
+                //去','
+                if (douyuUser.size() >= 1000) {
+                    toDouyuDb();
+                    douyuUser.clear();
+                }
+            } catch (Exception e) {
+                log.error(e.getLocalizedMessage());
             }
         }
+    }
+
+    private void toDouyuDb() {
+        StringBuffer sql = new StringBuffer("REPLACE INTO douyu_user (u_id, level, u_name) VALUES ");
+
+        Set<String> strings = douyuUser.keySet();
+        for (String key : strings) {
+            RedisUser redisUser = douyuUser.get(key);
+            if (redisUser.getLevel() == null) {
+                continue;
+            }
+            sql.append("('" + redisUser.getUid() + "'," + redisUser.getLevel() + ",'" + key + "'),");
+        }
+        //去','
+        if (',' == sql.charAt(sql.length() - 1)) {
+            sql = sql.deleteCharAt(sql.length() - 1);
+            jdbcTemplate.execute(sql.toString());
+        }
+    }
+
+    /**
+     * 用户信息持久化 panda
+     */
+    private void toPandaDb() {
+        StringBuffer sql = new StringBuffer("REPLACE INTO panda_user (u_id, level, u_name) VALUES ");
+
+        Set<String> strings = pandaUser.keySet();
+        for (String key : strings) {
+            RedisUser redisUser = pandaUser.get(key);
+            sql.append("('" + redisUser.getUid() + "'," + redisUser.getLevel() + ",'" + key + "'),");
+        }
+        if (',' == sql.charAt(sql.length() - 1)) {
+            sql = sql.deleteCharAt(sql.length() - 1);
+            jdbcTemplate.execute(sql.toString());
+        }
+
     }
 
     /**
      * 持久化弹幕数据
      */
-    private void toDb(ArrayList<RedisBarrage> redisBarrages) throws Exception {
+    private void toDb() throws Exception {
         StringBuffer pandaSql = new StringBuffer("insert into panda_barrage (content, date, level, nickname, rid, roomid) values ");
         StringBuffer douyuSql = new StringBuffer("insert into douyu_barrage (date, level, roomid, txt, uid, uname) values ");
 
@@ -132,7 +188,8 @@ public class RedisConsumerThread implements Runnable {
                 chars[i] = ' ';
             }
         }
-        return chars.toString();
+        String s1 = new String(chars);
+        return s1;
     }
 
     /**
@@ -146,15 +203,29 @@ public class RedisConsumerThread implements Runnable {
         if (redisBarrage.getWhere().equals(BarrageConstant.PANDA)) {
             PandaBarrage pandaBarrage = JSON.parseObject(redisBarrage.getBarrage().toString(), PandaBarrage.class);
             //房间id 自增
-            redisService.barrageAdd(BarrageConstant.PANDA+pandaBarrage.getRoomid());
+            redisService.barrageAdd(BarrageConstant.PANDA + pandaBarrage.getRoomid());
+
+            //用户统计
+            String rid = pandaBarrage.getRid();
+            Integer level = pandaBarrage.getLevel();
+            pandaUser.put(pandaBarrage.getNickname(), new RedisUser(rid, level));
+
         }
         if (redisBarrage.getWhere().equals(BarrageConstant.DOUYU)) {
             DouyuBarrage douyuBarrage = JSON.parseObject(redisBarrage.getBarrage().toString(), DouyuBarrage.class);
             //房间id 自增
             redisService.barrageAdd(BarrageConstant.DOUYU+douyuBarrage.getRoomid());
+
+            //用户统计
+            String uid = douyuBarrage.getUid();
+            Integer level = douyuBarrage.getLevel();
+            douyuUser.put(douyuBarrage.getUname(), new RedisUser(uid, level));
         }
     }
 
+    private void userCount(RedisBarrage redisBarrage) {
+
+    }
 //    public static void main(String[] args) {
 //        String s = "213'41234";
 //        String string = stringFmt(s);

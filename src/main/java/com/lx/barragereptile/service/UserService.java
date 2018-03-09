@@ -9,7 +9,7 @@ public interface UserService {
 
     PageBean<UserDTO> selectDouyuByName(PageBean<UserDTO> pageBean, String username, Integer offset, Integer limit);
 
-    int barrageToUser();
+//    int barrageToUser();
 
     UserDetailDTO selectByWhereAndUid(String where, String id);
 
