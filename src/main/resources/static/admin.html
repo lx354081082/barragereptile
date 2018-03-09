@@ -6,16 +6,66 @@
     <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
     <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="/bootstrap/bootstrap-table.css" rel="stylesheet"/>
+    <!--<link href="/bootstrap/bootstrap-table.css" rel="stylesheet"/>-->
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.css" rel="stylesheet">
     <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="/bootstrap/bootstrap-table.js"></script>
+    <!--<script src="/bootstrap/bootstrap-table.js"></script>-->
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.js"></script>
     <script src="https://cdn.hcharts.cn/highcharts/highcharts.js"></script>
     <!--<script src="/js/echarts.js"></script>-->
     <script type="text/javascript">
+        var chart = null;
         $(function () {
+            //运行状态Table
             zttab();
+            //曲线
+            chart = Highcharts.chart('Highcharts', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: '弹幕数量'
+                },
+                xAxis: {
+                    categories: ['60s', '55s', '50s', '45s', '40s', '35s', '30s', '25s', '20s', '15s', '10s', '5s']
+                },
+                yAxis: {
+                    title: {
+                        text: '数量'
+                    }
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true          // 开启数据标签
+                        },
+                        enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                    }
+                },
+                series: [{
+                    name: '东京',
+                    data: [8.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+                }, {
+                    name: '伦敦',
+                    data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+                }]
+            });
+
+
+
+            setTimeout(test, 5000);
         });
+
+        function test() {
+
+            var series = chart.series[0],
+                shift = series.data.length > 20; // 当数据点数量超过 20 个，则指定删除第一个点
+
+            // 新增点操作
+            //具体的参数详见：https://api.hcharts.cn/highcharts#Series.addPoint
+            chart.series[0].addPoint('111', true, shift);
+        }
 
         /**
          * 任务执行情况
@@ -119,7 +169,9 @@
             <div class="row clearfix" style="height: 100%">
                 <div class="col-md-12 column" style="height: 100%;padding-top: 50px;box-sizing: border-box">
                     <div>
-                        <div id="zttable"></div>
+                        <div id="zttable" style="width: 300px"></div>
+                        <div id="Highcharts" style="width: 600px;height:400px;"></div>
+
                     </div>
                 </div>
             </div>
