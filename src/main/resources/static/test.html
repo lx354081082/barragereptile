@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
+    <!--<link href="/bootstrap/bootstrap-table.css" rel="stylesheet"/>-->
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.css" rel="stylesheet">
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <!--<script src="/bootstrap/bootstrap-table.js"></script>-->
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.js"></script>
+    <script src="https://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+    <!--<script src="/js/echarts.js"></script>-->
+    <script type="text/javascript">
+        $(function () {
+            chartsys = Highcharts.chart('sysCharts', {
+                chart: {
+                    type: 'spline'
+                },
+                title: {
+                    text: '系统状态'
+                },
+                xAxis: {
+                    type: 'linear'
+                },
+                yAxis: [{
+                    title: {
+                        text: 'cpu'
+                    },
+                    id: 'cpu',
+                    max: 100,
+                    min:0
+                }, {
+                    title: {
+                        text: 'RAM'
+                    },
+                    id: 'ram',
+                    opposite: true,
+                    min:0
+                }],
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    },
+                    spline: {
+                        lineWidth: 2,
+                        states: {
+                            hover: {
+                                lineWidth: 3
+                            }
+                        },
+                        marker: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+
+
+            chartsys.addSeries({
+                name: 'ram',
+                data: [0, 0, 0, 123, 0, 0, 43, 0, 0, 0],
+                yAxis: 'ram',
+                id: 'rams',
+                type: 'area'
+            });
+
+            for (var i = 0; i < 4; i++) {
+                chartsys.addSeries({
+                    name: 'cpu' + i,
+                    data: [0, i*i*i*i, 0, 0, 0, 0, 0, 0, 0, 0],
+                    color: '#777',
+                    id: 'cpu' + i,
+                    yAxis: 'cpu'
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+<div>
+    <div id="sysCharts" style="width: 100%"></div>
+</div>
+</body>
+</html>
