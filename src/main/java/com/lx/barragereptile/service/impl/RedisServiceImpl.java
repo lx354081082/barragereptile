@@ -2,6 +2,9 @@ package com.lx.barragereptile.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.lx.barragereptile.po.RedisBarrage;
+import com.lx.barragereptile.po.RedisUser;
+import com.lx.barragereptile.pojo.DouyuBarrage;
+import com.lx.barragereptile.pojo.PandaBarrage;
 import com.lx.barragereptile.service.RedisService;
 import com.lx.barragereptile.util.BarrageConstant;
 import lombok.extern.log4j.Log4j;
@@ -16,25 +19,22 @@ import java.util.concurrent.TimeUnit;
 public class RedisServiceImpl implements RedisService {
     @Autowired
     RedisTemplate redisTemplate;
-//    @Override
-//    public void saveBarrage(String s, String val) {
-//        redisTemplate.convertAndSend("chat",val);
-//    }
-
     /**
      * 消息入列
      */
     @Override
-    public int lPush(String barrage, RedisBarrage redisBarrage) {
-        Long aLong = redisTemplate.opsForList().leftPush(barrage, JSON.toJSONString(redisBarrage));
-        return 0;
+    public void lPush(String barrage, RedisBarrage redisBarrage) {
+        redisTemplate.opsForList().leftPush(barrage, JSON.toJSONString(redisBarrage));
+        //统计弹幕信息
+        count(redisBarrage);
     }
 
     /**
-     * 出列
+     * 消息出列
      */
     @Override
     public RedisBarrage rpop(String barrage) {
+        //无消息会阻塞 0 等待时间 无限等待
         Object o = redisTemplate.opsForList().rightPop(barrage, 0, TimeUnit.SECONDS);
         RedisBarrage redisBarrage = JSON.parseObject(o.toString(), RedisBarrage.class);
         return redisBarrage;
@@ -66,6 +66,27 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public void clean(String key) {
         redisTemplate.delete(key);
+    }
+
+
+    /**
+     * 统计弹幕信息
+     */
+    private void count(RedisBarrage redisBarrage) {
+        //弹幕总数++
+        barrageAdd(BarrageConstant.ALLBARRAGE);
+
+        //根据房间id统计
+        if (redisBarrage.getWhere().equals(BarrageConstant.PANDA)) {
+            PandaBarrage barrage = (PandaBarrage) redisBarrage.getBarrage();
+            //房间id 自增
+            barrageAdd(BarrageConstant.PANDA + barrage.getRoomid());
+        }
+        if (redisBarrage.getWhere().equals(BarrageConstant.DOUYU)) {
+            DouyuBarrage barrage = (DouyuBarrage) redisBarrage.getBarrage();
+            //房间id 自增
+            barrageAdd(BarrageConstant.DOUYU+barrage.getRoomid());
+        }
     }
 
 }

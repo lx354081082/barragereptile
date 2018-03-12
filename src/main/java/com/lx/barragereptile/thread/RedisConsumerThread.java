@@ -43,42 +43,46 @@ public class RedisConsumerThread implements Runnable {
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            try {
-                RedisBarrage rpop = redisService.rpop(BarrageConstant.BARRAGE);
+            RedisBarrage rpop = redisService.rpop(BarrageConstant.BARRAGE);
 
-                //弹幕数据放入数组待用
-                redisBarrages.add(rpop);
+            //弹幕数据放入数组待用
+            redisBarrages.add(rpop);
 
-                //统计弹幕信息
-                count(rpop);
+            //统计弹幕信息
+            count(rpop);
 
 
-                //数量超过400 批量存数据库
-                if (redisBarrages.size() >= 2000) {
-                    try {
-                        toDb();
-                    } catch (Exception e) {
-                        log.error(e.getLocalizedMessage());
-                    }
-                    redisBarrages.clear();
+            //数量超过400 批量存数据库
+            if (redisBarrages.size() >= 2000) {
+                try {
+                    toDb();
+                } catch (Exception e) {
+                    log.error(e.getLocalizedMessage());
                 }
-                //panda用户信息持久化
-                if (pandaUser.size() >= 1000) {
+                redisBarrages.clear();
+            }
+            //panda用户信息持久化
+            if (pandaUser.size() >= 1000) {
+                try {
                     toPandaDb();
-                    pandaUser.clear();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                //去','
-                if (douyuUser.size() >= 1000) {
+                pandaUser.clear();
+            }
+            //去','
+            if (douyuUser.size() >= 1000) {
+                try {
                     toDouyuDb();
-                    douyuUser.clear();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                log.error(e.getLocalizedMessage());
+                douyuUser.clear();
             }
         }
     }
 
-    private void toDouyuDb() {
+    private void toDouyuDb() throws Exception {
         StringBuffer sql = new StringBuffer("REPLACE INTO douyu_user (u_id, level, u_name) VALUES ");
 
         Set<String> strings = douyuUser.keySet();
@@ -193,18 +197,11 @@ public class RedisConsumerThread implements Runnable {
     }
 
     /**
-     * 统计弹幕数量
+     * 统计用户信息
      */
     private void count(RedisBarrage redisBarrage) {
-        //弹幕总数++
-        redisService.barrageAdd(BarrageConstant.ALLBARRAGE);
-
-        //根据房间id统计
         if (redisBarrage.getWhere().equals(BarrageConstant.PANDA)) {
             PandaBarrage pandaBarrage = JSON.parseObject(redisBarrage.getBarrage().toString(), PandaBarrage.class);
-            //房间id 自增
-            redisService.barrageAdd(BarrageConstant.PANDA + pandaBarrage.getRoomid());
-
             //用户统计
             String rid = pandaBarrage.getRid();
             Integer level = pandaBarrage.getLevel();
@@ -213,9 +210,6 @@ public class RedisConsumerThread implements Runnable {
         }
         if (redisBarrage.getWhere().equals(BarrageConstant.DOUYU)) {
             DouyuBarrage douyuBarrage = JSON.parseObject(redisBarrage.getBarrage().toString(), DouyuBarrage.class);
-            //房间id 自增
-            redisService.barrageAdd(BarrageConstant.DOUYU+douyuBarrage.getRoomid());
-
             //用户统计
             String uid = douyuBarrage.getUid();
             Integer level = douyuBarrage.getLevel();

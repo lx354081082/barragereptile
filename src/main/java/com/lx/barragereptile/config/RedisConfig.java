@@ -24,7 +24,7 @@ public class RedisConfig {
         return redisTemplate;
     }
 //    /**
-//     * 消息订阅者
+//     * 消息订阅
 //     */
 //    @Bean
 //    RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory, MessageListenerAdapter listenerAdapter) {

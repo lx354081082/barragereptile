@@ -15,10 +15,48 @@
     <script src="https://cdn.hcharts.cn/highcharts/highcharts.js"></script>
     <!--<script src="/js/echarts.js"></script>-->
     <script type="text/javascript">
+        //全局变量
         var chart = null;
+        var chartsys = null;
+
+        var cpusize = 0;
+
+
+
+
+        var rooms = ['allRoom'];
+
+        var roomsObj = new Array();
+
+
+
         $(function () {
-            //运行状态Table
+            //加载 状态 折线图
+            hcharts();
+            //加载正在运行的任务(同步AJAX)
             zttab();
+            //初始化 图表 数据
+            $.each(rooms, function (i) {
+                // alert(i);
+                var c = chart.addSeries({
+                    name: this,
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                });
+                roomsObj.push(c);
+            });
+            //webSocket连接 监听数据
+            connect();
+
+            //加载系统折线图
+            syscharts();
+            //初始化系统折线图数据
+            sysConf()
+            //监听数据
+            sysConnect();
+
+        });
+
+        function hcharts() {
             //曲线
             chart = Highcharts.chart('Highcharts', {
                 chart: {
@@ -28,7 +66,7 @@
                     text: '弹幕数量'
                 },
                 xAxis: {
-                    categories: ['60s', '55s', '50s', '45s', '40s', '35s', '30s', '25s', '20s', '15s', '10s', '5s']
+                    type: 'linear'
                 },
                 yAxis: {
                     title: {
@@ -42,67 +80,169 @@
                         },
                         enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
                     }
-                },
-                series: [{
-                    name: '东京',
-                    data: [8.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-                }, {
-                    name: '伦敦',
-                    data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-                }]
+                }
             });
-
-
-
-            setTimeout(test, 5000);
-        });
-
-        function test() {
-
-            var series = chart.series[0],
-                shift = series.data.length > 20; // 当数据点数量超过 20 个，则指定删除第一个点
-
-            // 新增点操作
-            //具体的参数详见：https://api.hcharts.cn/highcharts#Series.addPoint
-            chart.series[0].addPoint('111', true, shift);
         }
 
+        function syscharts() {
+            chartsys = Highcharts.chart('sysCharts', {
+                chart: {
+                    type: 'area'
+                },
+                title: {
+                    text: '系统状态'
+                },
+                xAxis: {
+                    type: 'linear'
+                },
+                yAxis: [{
+                    title: {
+                        text: 'cpu'
+                    },
+                    id: 'cpu',
+                    max: 100
+                }, {
+                    title: {
+                        text: 'RAM'
+                    },
+                    id: 'ram',
+                    opposite: true
+                }],
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true          // 开启数据标签
+                        },
+                        enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                    }
+                }
+            });
+        }
+
+        function sysConf() {
+            $.ajax({
+                url: '/admin/sys/data',
+                type: "get",
+                async: false,
+                data: [],
+                success: function (data) {
+                    //设置y轴最大值
+                    chartsys.get('ram').setExtremes(0, parseInt(data.ram));
+                    //加载数据列
+                    chartsys.addSeries({
+                        name: 'ram',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        yAxis: 'ram',
+                        id: 'rams'
+                    });
+
+                    //cpu线程数
+                    cpusize = parseInt(data.size);
+
+                    //
+                    for (var i = 0; i < cpusize; i++) {
+                        chartsys.addSeries({
+                            name: 'cpu' + i,
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            id: 'cpu' + i,
+                            yAxis: 'cpu'
+                        });
+                    }
+                }
+            });
+        }
+
+        function sysConnect() {
+            var socket = new SockJS('/websocket');
+            stompClient = Stomp.over(socket);
+            //订阅地址
+            stompClient.connect({}, function (frame) {
+
+                //订阅消息
+                stompClient.subscribe('/topic/sys/data', function (message) {
+                    sysaddPoin(message.body);
+                });
+            })
+        }
+
+        function connect() {
+            var socket = new SockJS('/websocket');
+            stompClient = Stomp.over(socket);
+            // 订阅地址
+            stompClient.connect({}, function (frame) {
+
+                //订阅消息
+                stompClient.subscribe('/topic/barrage/count', function (message) {
+                    addPoin(message.body);
+                });
+            })
+        }
+
+        function addPoin(val) {
+
+            //string转JSON
+            var jsonobj = JSON.parse(val);
+
+            // json.each(function (k,v) {
+            //     alert(k + "======" + v);
+            // });
+            var flg = roomsObj[0].data.length > 30;
+
+            for (k in jsonobj) {
+                for (j = 0; j < rooms.length; j++) {
+                    // alert(rooms[j]+'-----------'+jsonobj[k])
+                    if (rooms[j] == k) {
+                        //添加数据点 false禁止重绘
+                        roomsObj[j].addPoint(jsonobj[k.toString()], false, flg);
+                    }
+                }
+            }
+            //图表重绘
+            chart.redraw();
+
+        }
+        function sysaddPoin(val) {
+            //string转JSON
+            var jsonobj = JSON.parse(val);
+            var flg = chartsys.get('rams').data.length > 30;
+
+            chartsys.get('rams').addPoint(jsonobj['ram'], false, flg);
+
+            for (var i = 0; i < cpusize; i++) {
+                chartsys.get('cpu'+i).addPoint(jsonobj['cpu'+i], false, flg);
+            }
+
+
+            //图表重绘
+            chartsys.redraw();
+        }
         /**
          * 任务执行情况
          */
         function zttab() {
-            //清楚Table
-            $("#zttable").bootstrapTable('destroy');
-            $("#zttable").bootstrapTable({
-                url: '/admin/joblist',         //请求后台的URL（*）
-                method: 'get',                      //请求方式（*）
-                striped: true,                      //是否显示行间隔色
-                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
-                pagination: false,                   //是否显示分页（*）
-                sortable: false,                     //是否启用排序
-                sortOrder: "asc",                   //排序方式
-                showColumns: true,                  //是否显示所有的列
-                showRefresh: true,                  //是否显示刷新按钮
-                minimumCountColumns: 2,             //最少允许的列数
-                clickToSelect: true,                //是否启用点击选中行
-                columns: [{
-                    visible: false,
-                    field: 'threadid',
-                    title: '弹幕',
-                }, {
-                    field: 'roomid',
-                    title: '房间号'
-                }, {
-                    field: 'open',
-                    title: '操作',
-                    align: 'center', formatter: function (value, row, index) {
-                        return '<a class="btn btn-primary btn-sm" href="#" mce_href="#" title="编辑" onclick="stop(\'' + row.roomid + '\')"><i class="fa fa-edit">结束任务</i></a>'
-                    }
+            $.ajax({
+                url: '/admin/joblist',
+                type: "get",
+                async: false,
+                data: [],
+                success: function (data) {
+                    $("#zttable").empty();
+                    $(data).each(function () {
+
+                        rooms.push(this.roomid);
+
+                        var txt = '<button type="button" class="btn btn-sm btn-info" onclick="stop(\'' + this.roomid + '\')">' + this.roomid + '</button>&nbsp;'
+                        $("#zttable").prepend(txt);
+                    })
                 }
-                ]
+
             });
         }
 
+        /**
+         * 暂停任务
+         * @param rommid
+         */
         function stop(rid) {
             $.ajax({
                 url: '/admin/stop/' + rid,
@@ -168,11 +308,11 @@
             </nav>
             <div class="row clearfix" style="height: 100%">
                 <div class="col-md-12 column" style="height: 100%;padding-top: 50px;box-sizing: border-box">
-                    <div>
-                        <div id="zttable" style="width: 300px"></div>
-                        <div id="Highcharts" style="width: 600px;height:400px;"></div>
-
-                    </div>
+                    正在运行的任务&nbsp;点击停止任务
+                    <span id="zttable"></span>
+                    <br/>
+                    <div id="Highcharts" style="width: 100%"></div>
+                    <div id="sysCharts" style="width: 100%"></div>
                 </div>
             </div>
         </div>
