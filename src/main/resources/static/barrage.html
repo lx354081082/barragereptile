@@ -8,8 +8,53 @@
     <link href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/bootstrap-table.js"></script>
+    <link href="/bootstrap/bootstrap-table.css" rel="stylesheet"/>
     <script type="text/javascript">
 
+        function tab() {
+            $("#tab").bootstrapTable('destroy');
+            $("#tab").bootstrapTable({
+                url: '/barrage/find',         //请求后台的URL（*）
+                method: 'get',                      //请求方式（*）
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: false,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParams: function(params) {
+                    return {
+                        //说明：传入后台的参数包括offset开始索引，limit步长，sort排序列，order：desc或者,以及所有列的键值对
+                        limit : params.limit,
+                        offset : params.offset,
+                        roomid : $("#roomid").val(),
+                        where : $("#where").val()
+                    };
+                },//传递参数（*）
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                       //初始化加载第一页，默认第一页
+                pageSize: 50,                       //每页的记录行数（*）
+                pageList: [10, 50, 100, 200],        //可供选择的每页的行数（*）
+                showColumns: true,                  //是否显示所有的列
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                columns: [{
+                    field: 'uname',
+                    title: '用户名'
+                },{
+                    field: 'txt',
+                    title: '弹幕'
+                }, {
+                    field: 'roomid',
+                    title: '房间号'
+                }, {
+                    field: 'date',
+                    title: '时间'
+                } ]
+            });
+        }
     </script>
 </head>
 <body style="height: 100%">
@@ -60,20 +105,21 @@
                     <div class="col-md-12 column"  style="height: 100%;padding-top: 70px;box-sizing: border-box">
                         <div class="col-md-3">
                             <label for="exampleInputEmail1">平台</label>
-                            <select class="form-control" >
+                            <select class="form-control" id="where" >
                                 <option value="douyu">斗鱼</option>
                                 <option value="panda">熊猫</option>
                             </select>
                             <div class="group">
-                                <label for="exampleInputEmail1">房间号</label><input class="form-control" id="exampleInputEmail1" type="text" />
+                                <label for="exampleInputEmail1">房间号</label><input class="form-control" id="roomid" type="text" />
                             </div>
-                            <div class="group">
-                                <label for="exampleInputPassword1">用户名</label><input class="form-control" id="exampleInputPassword1" type="text" />
-                            </div>
+                            <!--<div class="group">-->
+                                <!--<label for="exampleInputPassword1">用户名</label><input class="form-control" id="exampleInputPassword1" type="text" />-->
+                            <!--</div>-->
                             <br/>
-                            <button type="submit" class="btn btn-default" onclick="">搜索</button>
+                            <button type="submit" class="btn btn-default" onclick="tab()">搜索</button>
                         </div>
                         <div class="col-md-9 column">
+                            <div id="tab"></div>
                         </div>
                     </div>
                 </div>

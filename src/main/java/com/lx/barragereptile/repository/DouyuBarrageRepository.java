@@ -2,13 +2,15 @@ package com.lx.barragereptile.repository;
 
 import com.lx.barragereptile.dto.UserDTO;
 import com.lx.barragereptile.pojo.DouyuBarrage;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Map;
 
-public interface DouyuBarrageRepository extends JpaRepository<DouyuBarrage, String> {
+public interface DouyuBarrageRepository extends JpaRepository<DouyuBarrage, String>,JpaSpecificationExecutor<DouyuBarrage> {
 
     /**
      * 模糊查询用户名
@@ -33,4 +35,9 @@ public interface DouyuBarrageRepository extends JpaRepository<DouyuBarrage, Stri
 
     @Query(value = "SELECT COUNT(1) FROM `douyu_barrage` WHERE uid=?1", nativeQuery = true)
     int selectCountByUid(String uid);
+
+    int countAllByRoomidIs(String rid);
+
+    List<DouyuBarrage> findAllByRoomidIs(String rid, PageRequest pageRequest);
+
 }

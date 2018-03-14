@@ -19,6 +19,7 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.Swap;
 import org.hyperic.sigar.Who;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -137,27 +138,31 @@ public class WebSocketController {
      */
     @Scheduled(fixedRate = 2000)
     public void sys() throws SigarException {
-        Map<String, Object> map = new HashMap<>();
-        Mem mem = sigar.getMem();
-        // 当前内存使用量
-        long l = mem.getUsed() / 1024L / 1024L;
-        map.put("ram", l);
+        try {
+            Map<String, Object> map = new HashMap<>();
+            Mem mem = sigar.getMem();
+            // 当前内存使用量
+            long l = mem.getUsed() / 1024L / 1024L;
+            map.put("ram", l);
 
-        Cpu cpu = sigar.getCpu();
-        CpuPerc cpuList[] = sigar.getCpuPercList();
-        for (int i = 0; i < cpuList.length; i++) {
-            NumberFormat nf = NumberFormat.getNumberInstance();
-            // 保留两位小数
-            nf.setMaximumFractionDigits(2);
-            // 如果不需要四舍五入，可以使用RoundingMode.DOWN
-            nf.setRoundingMode(RoundingMode.UP);
-            String format = nf.format(cpuList[i].getCombined() * 100.0D);
-            Double d = Double.parseDouble(format);
-            //cpu使用量
-            map.put("cpu" + i, d);
+            Cpu cpu = sigar.getCpu();
+            CpuPerc cpuList[] = sigar.getCpuPercList();
+            for (int i = 0; i < cpuList.length; i++) {
+                NumberFormat nf = NumberFormat.getNumberInstance();
+                // 保留两位小数
+                nf.setMaximumFractionDigits(2);
+                // 如果不需要四舍五入，可以使用RoundingMode.DOWN
+                nf.setRoundingMode(RoundingMode.UP);
+                String format = nf.format(cpuList[i].getCombined() * 100.0D);
+                Double d = Double.parseDouble(format);
+                //cpu使用量
+                map.put("cpu" + i, d);
+            }
+
+            template.convertAndSend("/topic/sys/data", JSON.toJSONString(map));
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
         }
-
-        template.convertAndSend("/topic/sys/data", JSON.toJSONString(map));
 
     }
 

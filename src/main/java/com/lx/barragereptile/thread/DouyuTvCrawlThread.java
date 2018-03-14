@@ -62,6 +62,44 @@ public class DouyuTvCrawlThread implements Runnable,Cloneable {
     }
 
     /**
+     * 运行主流程
+     */
+    @Override
+    public void run() {
+        //初始化连接弹幕服务器
+        init();
+        long start = System.currentTimeMillis();
+        //心跳包线程内部类
+        Thread keep = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.interrupted()) {
+                    try {
+                        keepAlive();
+                    } catch (IOException e) {
+                        log.error("心跳包发生异常结束当前进程");
+                        return;
+                    }
+                    try {
+                        Thread.sleep(45000);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        },roomId+"心跳包");
+        keep.start();
+        //判断当前进程结束标记 and 心跳包进程是否在运行
+        while (!Thread.interrupted() && keep.isAlive()) {
+
+            //处理请求
+            getServerMsg();
+        }
+        //结束心跳包线程
+        keep.interrupt();
+        log.warn("结束进程");
+    }
+
+    /**
      * 初始化方法
      */
     private void init() {
@@ -259,44 +297,6 @@ public class DouyuTvCrawlThread implements Runnable,Cloneable {
         } catch (NumberFormatException e) {
         }
         douyuBarrage.setTxt(txt);
-    }
-
-    /**
-     * 运行主流程
-     */
-    @Override
-    public void run() {
-        //初始化连接弹幕服务器
-        init();
-        long start = System.currentTimeMillis();
-        //心跳包线程内部类
-        Thread keep = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!Thread.interrupted()) {
-                    try {
-                        keepAlive();
-                    } catch (IOException e) {
-                        log.error("心跳包发生异常结束当前进程");
-                        return;
-                    }
-                    try {
-                        Thread.sleep(45000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-        },roomId+"心跳包");
-        keep.start();
-        //判断当前进程结束标记 and 心跳包进程是否在运行
-        while (!Thread.interrupted() && keep.isAlive()) {
-
-            //处理请求
-            getServerMsg();
-        }
-        //结束心跳包线程
-        keep.interrupt();
-        log.warn("结束进程");
     }
 
     /**

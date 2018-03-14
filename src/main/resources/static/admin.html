@@ -98,7 +98,7 @@
         function syscharts() {
             chartsys = Highcharts.chart('sysCharts', {
                 chart: {
-                    type: 'area'
+                    type: 'spline'
                 },
                 title: {
                     text: '系统状态'
@@ -111,20 +111,51 @@
                         text: 'cpu'
                     },
                     id: 'cpu',
-                    max: 100
+                    max: 100,
+                    min:0
                 }, {
                     title: {
                         text: 'RAM'
                     },
                     id: 'ram',
-                    opposite: true
+                    opposite: true,
+                    min:0
                 }],
                 plotOptions: {
-                    line: {
-                        dataLabels: {
-                            enabled: true          // 开启数据标签
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
                         },
-                        enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    },
+                    spline: {
+                        lineWidth: 2,
+                        states: {
+                            hover: {
+                                lineWidth: 3
+                            }
+                        },
+                        marker: {
+                            enabled: false
+                        }
                     }
                 }
             });
@@ -144,7 +175,8 @@
                         name: 'ram',
                         data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         yAxis: 'ram',
-                        id: 'rams'
+                        id: 'rams',
+                        type: 'area'
                     });
 
                     //cpu线程数

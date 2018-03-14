@@ -3,11 +3,12 @@ package com.lx.barragereptile.repository;
 
 import com.lx.barragereptile.pojo.PandaBarrage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface PandaBarrageRepository extends JpaRepository<PandaBarrage, String> {
+public interface PandaBarrageRepository extends JpaRepository<PandaBarrage, String>,JpaSpecificationExecutor<PandaBarrage> {
     /**
      * 模糊查询用户名
      * nativeQuery = true 原生sql查询
